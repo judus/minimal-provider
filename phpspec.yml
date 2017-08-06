@@ -1,0 +1,4 @@
+suites:
+  library_suite:
+    namespace: Maduser\Minimal\Provider\Tests
+    psr4_prefix: Maduser\Minimal\Provider\Tests
