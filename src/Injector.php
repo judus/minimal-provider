@@ -27,45 +27,87 @@ class Injector
     }
 
     /**
-     * @param            $class
-     * @param array|null $params
+     * @param $class
      *
-     * @return object
-     * @throws IocNotResolvableException
-     * @throws UnresolvedDependenciesException
+     * @return \ReflectionClass
+     * @throws ClassDoesNotExistException
      */
-    public function make($class, array $params = null)
+    public function reflect($class)
     {
-        $reflected = $this->reflect($class);
+        try {
+            return new \ReflectionClass($class);
+        } catch (\Exception $e) {
+            throw new ClassDoesNotExistException('Class ' . $class . ' does not exist');
+        }
+    }
 
-        if (empty($reflected->getConstructor())) {
+    /**
+     * @param \ReflectionParameter $parameter
+     *
+     * @return mixed|null
+     */
+    public function getDependency(\ReflectionParameter $parameter)
+    {
+        if ($parameter->isArray() || !$parameter->getClass()) {
+            return null;
+        }
 
-            if ($reflected->isInterface()) {
-                throw new IocNotResolvableException(
-                    'Cannot instantiate ' . $reflected->getName()
-                );
+        $class = $parameter->getClass()->name;
+
+        if ($class == 'Closure') {
+            return null;
+        }
+
+        $reflected = new \ReflectionClass($class);
+
+        if ($this->provider->hasBinding($reflected->name)) {
+            return $this->provider->getBinding($reflected->name);
+        } else {
+            // TODO: inspect this
+            return $reflected->name;
+        }
+    }
+
+    /**
+     * @param \ReflectionClass $reflected
+     *
+     * @return array
+     */
+    public function getDependencies(\ReflectionClass $reflected)
+    {
+        $dependencies = [];
+
+        if ($constructor = $reflected->getConstructor()) {
+            $parameters = $constructor->getParameters();
+            foreach ($parameters as $parameter) {
+                $dependencies[] = $this->getDependency($parameter);
             }
-
-            return $reflected->newInstance();
         }
 
-        $dependencies = $this->getDependencies($reflected);
+        return $dependencies;
+    }
 
-        $instanceArgs = $this->resolveDependencies($dependencies);
+    /**
+     * @param array $dependencies
+     *
+     * @return array
+     */
+    public function resolveDependencies(array $dependencies)
+    {
+        foreach ($dependencies as &$dependency) {
+            if (is_null($dependency)) {
+                $dependency = null;
+            } else {
 
-        $instanceArgs = $this->setArgsValues($params, $instanceArgs);
-
-        if (count($dependencies) != count($instanceArgs)) {
-            throw new UnresolvedDependenciesException(
-                'Could not resolve all dependencies', [
-                'Required' => $dependencies,
-                'Resolved' => $instanceArgs
-            ]);
+                if ($this->provider->hasProvider($dependency)) {
+                    $dependency = $this->provider->resolve($dependency);
+                } else {
+                    $dependency = $this->make($dependency);
+                }
+            }
         }
 
-        $instanceArgs = $this->mergeArgsAndParams($instanceArgs, $params);
-
-        return $reflected->newInstanceArgs($instanceArgs);
+        return $dependencies;
     }
 
     /**
@@ -106,87 +148,45 @@ class Injector
     }
 
     /**
-     * @param $class
+     * @param            $class
+     * @param array|null $params
      *
-     * @return \ReflectionClass
-     * @throws ClassDoesNotExistException
+     * @return object
+     * @throws IocNotResolvableException
+     * @throws UnresolvedDependenciesException
      */
-    public function reflect($class)
+    public function make($class, array $params = null)
     {
-        try {
-            return new \ReflectionClass($class);
-        } catch (\Exception $e) {
-            throw new ClassDoesNotExistException('Class ' . $class . ' does not exist');
-        }
-    }
+        $reflected = $this->reflect($class);
 
-    /**
-     * @param \ReflectionClass $reflected
-     *
-     * @return array
-     */
-    public function getDependencies(\ReflectionClass $reflected)
-    {
-        $dependencies = [];
+        if (empty($reflected->getConstructor())) {
 
-        if ($constructor = $reflected->getConstructor()) {
-            $parameters = $constructor->getParameters();
-            foreach ($parameters as $parameter) {
-                $dependencies[] = $this->getDependency($parameter);
+            if ($reflected->isInterface()) {
+                throw new IocNotResolvableException(
+                    'Cannot instantiate ' . $reflected->getName()
+                );
             }
+
+            return $reflected->newInstance();
         }
 
-        return $dependencies;
-    }
+        $dependencies = $this->getDependencies($reflected);
 
-    /**
-     * @param \ReflectionParameter $parameter
-     *
-     * @return mixed|null
-     */
-    public function getDependency(\ReflectionParameter $parameter)
-    {
-        if ($parameter->isArray() || !$parameter->getClass()) {
-            return null;
+        $instanceArgs = $this->resolveDependencies($dependencies);
+
+        $instanceArgs = $this->setArgsValues($params, $instanceArgs);
+
+        if (count($dependencies) != count($instanceArgs)) {
+            throw new UnresolvedDependenciesException(
+                'Could not resolve all dependencies', [
+                'Required' => $dependencies,
+                'Resolved' => $instanceArgs
+            ]);
         }
 
-        $class = $parameter->getClass()->name;
+        $instanceArgs = $this->mergeArgsAndParams($instanceArgs, $params);
 
-        if ($class == 'Closure') {
-            return null;
-        }
-
-        $reflected = new \ReflectionClass($class);
-
-        if ($this->provider->hasBinding($reflected->name)) {
-            return $this->provider->getBinding($reflected->name);
-        } else {
-            // TODO: inspect this
-            return $reflected->name;
-        }
-    }
-
-    /**
-     * @param array $dependencies
-     *
-     * @return array
-     */
-    public function resolveDependencies(array $dependencies)
-    {
-        foreach ($dependencies as &$dependency) {
-            if (is_null($dependency)) {
-                $dependency = null;
-            } else {
-
-                if ($this->provider->hasProvider($dependency)) {
-                    $dependency = $this->provider->resolve($dependency);
-                } else {
-                    $dependency = $this->make($dependency);
-                }
-            }
-        }
-
-        return $dependencies;
+        return $reflected->newInstanceArgs($instanceArgs);
     }
 
 }
