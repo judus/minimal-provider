@@ -60,6 +60,8 @@ class Provider implements ProviderInterface
         $this->setProviders(is_null($providers) ? [] : $providers);
 
         $this->singletons = new Container();
+
+        $this->singleton(get_class($this), $this);
     }
 
     /**
