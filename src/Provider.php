@@ -1,5 +1,6 @@
 <?php namespace Maduser\Minimal\Provider;
 
+use Maduser\Minimal\Provider\Contracts\ProviderInterface;
 use Maduser\Minimal\Provider\Exceptions\IocNotResolvableException;
 
 /**
@@ -7,7 +8,7 @@ use Maduser\Minimal\Provider\Exceptions\IocNotResolvableException;
  *
  * @package Maduser\Minimal\Provider
  */
-class Provider
+class Provider implements ProviderInterface
 {
     /**
      * @var
@@ -49,14 +50,14 @@ class Provider
      * @param array $bindings
      */
     public function __construct(
-        array $providers = [],
-        array $bindings = []
+        array $providers = null,
+        array $bindings = null
     ) {
         $this->injector = new Injector($this);
         $this->resolver = new Resolver($this);
 
-        $this->setBindings($bindings);
-        $this->setProviders($providers);
+        $this->setBindings(is_null($bindings) ? [] : $bindings);
+        $this->setProviders(is_null($providers) ? [] : $providers);
 
         $this->singletons = new Container();
     }
