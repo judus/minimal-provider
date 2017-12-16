@@ -1,6 +1,5 @@
 <?php namespace Maduser\Minimal\Provider;
 
-use Maduser\Minimal\Middlewares\Middleware;
 use Maduser\Minimal\Provider\Contracts\ProviderInterface;
 use Maduser\Minimal\Provider\Exceptions\IocNotResolvableException;
 
@@ -15,22 +14,18 @@ class Provider implements ProviderInterface
      * @var
      */
     private $providers;
-
     /**
      * @var
      */
     private $bindings;
-
     /**
      * @var Container
      */
     private $singletons;
-
     /**
      * @var Resolver
      */
     private $resolver;
-
     /**
      * @var Injector
      */
@@ -56,12 +51,9 @@ class Provider implements ProviderInterface
     ) {
         $this->injector = new Injector($this);
         $this->resolver = new Resolver($this);
-
         $this->setBindings(is_null($bindings) ? [] : $bindings);
         $this->setProviders(is_null($providers) ? [] : $providers);
-
         $this->singletons = new Container();
-
         $this->singleton(get_class($this), $this);
     }
 
@@ -86,21 +78,16 @@ class Provider implements ProviderInterface
      */
     public function hasProvider($name)
     {
-
         if ($this->singletons->has($name)) {
             return $this->singletons->get($name);
         }
-
         if ($this->providers->has($name)) {
             return $this->providers->get($name);
         }
-
         $alias = basename(str_replace('\\', '/', $name));
-
         if ($this->singletons->has($alias)) {
             return $this->singletons->get($alias);
         }
-
         if ($this->providers->has($alias)) {
             return $this->providers->get($alias);
         }
@@ -196,9 +183,8 @@ class Provider implements ProviderInterface
      */
     public function resolve($name, $params = null)
     {
-        if (! $resolved = $this->resolver->resolve($name, $params)) {
+        if (!$resolved = $this->resolver->resolve($name, $params)) {
         }
-
 
         return $resolved;
     }
@@ -211,12 +197,6 @@ class Provider implements ProviderInterface
      */
     public function make($name, $params = null)
     {
-        if ($name == Middleware::class) {
-            //show($params, '<h1>Making Middleware with params:</h1>');
-            //show($this->injector->make($name, $params));
-        }
-
-
         return $this->injector->make($name, $params);
     }
 
