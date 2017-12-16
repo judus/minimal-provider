@@ -1,5 +1,6 @@
 <?php namespace Maduser\Minimal\Provider;
 
+use Maduser\Minimal\Middlewares\Middleware;
 use Maduser\Minimal\Provider\Contracts\ProviderInterface;
 use Maduser\Minimal\Provider\Exceptions\IocNotResolvableException;
 
@@ -196,8 +197,8 @@ class Provider implements ProviderInterface
     public function resolve($name, $params = null)
     {
         if (! $resolved = $this->resolver->resolve($name, $params)) {
-
         }
+
 
         return $resolved;
     }
@@ -210,6 +211,12 @@ class Provider implements ProviderInterface
      */
     public function make($name, $params = null)
     {
+        if ($name == Middleware::class) {
+            //show($params, '<h1>Making Middleware with params:</h1>');
+            //show($this->injector->make($name, $params));
+        }
+
+
         return $this->injector->make($name, $params);
     }
 

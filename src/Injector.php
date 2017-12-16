@@ -1,5 +1,6 @@
 <?php namespace Maduser\Minimal\Provider;
 
+use Maduser\Minimal\Middlewares\Middleware;
 use Maduser\Minimal\Provider\Exceptions\ClassDoesNotExistException;
 use Maduser\Minimal\Provider\Exceptions\IocNotResolvableException;
 use Maduser\Minimal\Provider\Exceptions\UnresolvedDependenciesException;
@@ -34,6 +35,10 @@ class Injector
      */
     public function reflect($class)
     {
+        if ($class == 'array') {
+            return [];
+        }
+
         try {
             return new \ReflectionClass($class);
         } catch (\Exception $e) {
@@ -46,9 +51,14 @@ class Injector
      *
      * @return mixed|null
      */
-    public function getDependency(\ReflectionParameter $parameter)
+    public function getDependency(\ReflectionParameter $parameter, \ReflectionClass $reflected)
     {
         if ($parameter->isArray() || !$parameter->getClass()) {
+
+            if ($parameter->isArray()) {
+                return 'array';
+            }
+
             return null;
         }
 
@@ -80,7 +90,7 @@ class Injector
         if ($constructor = $reflected->getConstructor()) {
             $parameters = $constructor->getParameters();
             foreach ($parameters as $parameter) {
-                $dependencies[] = $this->getDependency($parameter);
+                $dependencies[] = $this->getDependency($parameter, $reflected);
             }
         }
 
@@ -97,6 +107,8 @@ class Injector
         foreach ($dependencies as &$dependency) {
             if (is_null($dependency)) {
                 $dependency = null;
+            } else if ($dependency == 'array') {
+                $dependency = [];
             } else {
 
                 if ($this->provider->hasProvider($dependency)) {
@@ -140,6 +152,22 @@ class Injector
      */
     public function mergeArgsAndParams(array $args, array $params = null)
     {
+
+        if ($params) {
+            foreach ($args as &$arg) {
+                if (is_array($arg)) {
+                    foreach ($params as &$param) {
+                        if (is_array($param)) {
+                            $arg = $param;
+                            unset($param);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+
         if (is_array($params)) {
             return array_merge($args, $params);
         }
@@ -157,6 +185,10 @@ class Injector
      */
     public function make($class, array $params = null)
     {
+        if ($class == 'array') {
+            return [];
+        }
+
         $reflected = $this->reflect($class);
 
         if (empty($reflected->getConstructor())) {
@@ -183,7 +215,6 @@ class Injector
                 'Resolved' => $instanceArgs
             ]);
         }
-
         $instanceArgs = $this->mergeArgsAndParams($instanceArgs, $params);
 
         return $reflected->newInstanceArgs($instanceArgs);

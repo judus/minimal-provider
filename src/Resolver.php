@@ -50,7 +50,9 @@ class Resolver
             return $registered;
         }
 
-        throw new IocNotResolvableException($name);
+        return $this->provider->getInjector()->make($name, $params);
+
+        //throw new IocNotResolvableException($name);
     }
 
     /**
