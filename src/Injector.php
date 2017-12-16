@@ -182,6 +182,7 @@ class Injector
      * @return object
      * @throws IocNotResolvableException
      * @throws UnresolvedDependenciesException
+     * @throws ClassDoesNotExistException
      */
     public function make($class, array $params = null)
     {

@@ -17,7 +17,7 @@ class ResolverTest extends TestCase
     }
 
     /**
-     * @expectedException \Maduser\Minimal\Provider\Exceptions\IocNotResolvableException
+     * @expectedException \Maduser\Minimal\Provider\Exceptions\ClassDoesNotExistException
      */
     public function testResolveThrowsIocNotResolvable()
     {

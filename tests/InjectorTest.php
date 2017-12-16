@@ -38,7 +38,7 @@ class InjectorTest extends TestCase
         $injector = new Injector(new Provider());
         $reflected = $injector->reflect(DummyClassC::class);
         $parameters = $reflected->getConstructor()->getParameters();
-        $result = $injector->getDependency($parameters[0]);
+        $result = $injector->getDependency($parameters[0], $reflected);
 
         $this->assertEquals($expected, $result);
     }
@@ -50,7 +50,7 @@ class InjectorTest extends TestCase
         $injector = new Injector(new Provider([], [DummyInterface::class => DummyClassA::class]));
         $reflected = $injector->reflect(DummyClassE::class);
         $parameters = $reflected->getConstructor()->getParameters();
-        $result = $injector->getDependency($parameters[0]);
+        $result = $injector->getDependency($parameters[0], $reflected);
 
         $this->assertEquals($expected, $result);
     }

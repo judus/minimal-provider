@@ -32,7 +32,6 @@ class Resolver
      * @param null $params
      *
      * @return mixed
-     * @throws IocNotResolvableException
      */
     public function resolve($name, $params = null)
     {
@@ -51,8 +50,6 @@ class Resolver
         }
 
         return $this->provider->getInjector()->make($name, $params);
-
-        //throw new IocNotResolvableException($name);
     }
 
     /**
