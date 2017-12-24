@@ -1,5 +1,6 @@
 <?php namespace Maduser\Minimal\Provider;
 
+use App\Modules\ContactForm\Admin\Controllers\ContactFormController;
 use Maduser\Minimal\Middlewares\Middleware;
 use Maduser\Minimal\Provider\Exceptions\ClassDoesNotExistException;
 use Maduser\Minimal\Provider\Exceptions\IocNotResolvableException;
@@ -102,7 +103,7 @@ class Injector
      *
      * @return array
      */
-    public function resolveDependencies(array $dependencies)
+    public function resolveDependencies(array $dependencies, $params = null)
     {
         foreach ($dependencies as &$dependency) {
             if (is_null($dependency)) {
@@ -112,9 +113,9 @@ class Injector
             } else {
 
                 if ($this->provider->hasProvider($dependency)) {
-                    $dependency = $this->provider->resolve($dependency);
+                    $dependency = $this->provider->resolve($dependency, $params);
                 } else {
-                    $dependency = $this->make($dependency);
+                    $dependency = $this->make($dependency, $params);
                 }
             }
         }
@@ -195,6 +196,11 @@ class Injector
         if (empty($reflected->getConstructor())) {
 
             if ($reflected->isInterface()) {
+
+                if ($match = $this->findMatchInParams($reflected, $params)) {
+                    return $this->make($match->getName());
+                }
+
                 throw new IocNotResolvableException(
                     'Cannot instantiate ' . $reflected->getName()
                 );
@@ -205,7 +211,7 @@ class Injector
 
         $dependencies = $this->getDependencies($reflected);
 
-        $instanceArgs = $this->resolveDependencies($dependencies);
+        $instanceArgs = $this->resolveDependencies($dependencies, $params);
 
         $instanceArgs = $this->setArgsValues($params, $instanceArgs);
 
@@ -219,6 +225,22 @@ class Injector
         $instanceArgs = $this->mergeArgsAndParams($instanceArgs, $params);
 
         return $reflected->newInstanceArgs($instanceArgs);
+    }
+
+    public function findMatchInParams($reflected, array $params = null)
+    {
+        if (! $params) return null;
+
+        foreach ($params as $param) {
+            if (is_object($param)) {
+                $paramReflection = new \ReflectionClass($param);
+                if ($paramReflection->implementsInterface($reflected->getName())) {
+                    return $paramReflection;
+                }
+            }
+        }
+
+        return null;
     }
 
 }
