@@ -104,6 +104,9 @@ class Provider implements ProviderInterface
     public function singleton($name, $object = null)
     {
         if ($object) {
+
+            is_callable($object) ? $object = $object() : $object;
+
             return $this->singletons[$name] = $object;
         } else {
             return $this->singletons[$name];

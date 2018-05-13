@@ -168,7 +168,6 @@ class Injector
             }
         }
 
-
         if (is_array($params)) {
             return array_merge($args, $params);
         }
