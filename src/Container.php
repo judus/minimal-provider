@@ -126,4 +126,12 @@ class Container implements \ArrayAccess
     {
         return $this->offsetExists($offset);
     }
+
+    /**
+     * @return array
+     */
+    public function getArray(): array
+    {
+      return $this->array;
+    }
 }
