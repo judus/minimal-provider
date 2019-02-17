@@ -10,11 +10,6 @@ interface AbstractProviderInterface
     /**
      * @return mixed
      */
-    public function init();
-
-    /**
-     * @return mixed
-     */
     public function register();
 
     /**
@@ -29,4 +24,9 @@ interface AbstractProviderInterface
      * @return mixed
      */
     public function singleton($name, $object);
+
+    /**
+     * @return string
+     */
+    public function __toString();
 }
