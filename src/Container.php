@@ -208,4 +208,5 @@ class Container implements \ArrayAccess, \Iterator
     {
         reset($this->array);
     }
+
 }
