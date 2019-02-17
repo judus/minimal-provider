@@ -5,7 +5,7 @@
  *
  * @package Maduser\Minimal\Provider
  */
-class Container implements \ArrayAccess
+class Container implements \ArrayAccess, \Iterator
 {
     /**
      * @var array
@@ -125,5 +125,87 @@ class Container implements \ArrayAccess
     public function has($offset)
     {
         return $this->offsetExists($offset);
+    }
+
+    /**
+     * @return array
+     */
+    public function getArray(): array
+    {
+      return $this->array;
+    }
+
+    public function each($closure)
+    {
+        $container = new static();
+
+        foreach ($this->array as $key => $item) {
+            $container->add($key, $closure($item));
+        }
+
+        return $container;
+    }
+
+    /* Iterator */
+
+    /**
+     * Return the current element
+     *
+     * @link  http://php.net/manual/en/iterator.current.php
+     * @return mixed Can return any type.
+     * @since 5.0.0
+     */
+    public function current()
+    {
+        return current($this->array);
+    }
+
+    /**
+     * Move forward to next element
+     *
+     * @link  http://php.net/manual/en/iterator.next.php
+     * @return void Any returned value is ignored.
+     * @since 5.0.0
+     */
+    public function next()
+    {
+        next($this->array);
+    }
+
+    /**
+     * Return the key of the current element
+     *
+     * @link  http://php.net/manual/en/iterator.key.php
+     * @return mixed scalar on success, or null on failure.
+     * @since 5.0.0
+     */
+    public function key()
+    {
+        return key($this->array);
+    }
+
+    /**
+     * Checks if current position is valid
+     *
+     * @link  http://php.net/manual/en/iterator.valid.php
+     * @return boolean The return value will be casted to boolean and then evaluated.
+     * Returns true on success or false on failure.
+     * @since 5.0.0
+     */
+    public function valid()
+    {
+        return $this->current() !== false;
+    }
+
+    /**
+     * Rewind the Iterator to the first element
+     *
+     * @link  http://php.net/manual/en/iterator.rewind.php
+     * @return void Any returned value is ignored.
+     * @since 5.0.0
+     */
+    public function rewind()
+    {
+        reset($this->array);
     }
 }
