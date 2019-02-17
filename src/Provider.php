@@ -1,5 +1,6 @@
 <?php namespace Maduser\Minimal\Provider;
 
+use Maduser\Minimal\Provider\Contracts\AbstractProviderInterface;
 use Maduser\Minimal\Provider\Contracts\ProviderInterface;
 use Maduser\Minimal\Provider\Exceptions\IocNotResolvableException;
 
@@ -11,7 +12,7 @@ use Maduser\Minimal\Provider\Exceptions\IocNotResolvableException;
 class Provider implements ProviderInterface
 {
     /**
-     * @var
+     * @var Container
      */
     private $providers;
     /**
@@ -124,10 +125,11 @@ class Provider implements ProviderInterface
     /**
      * @param $providers_
      */
-    public function addProviders($providers_)
+    public function addProviders($providers)
     {
-        $providers = $this->providers->get();
-        $this->providers = new Container(array_merge($providers, $providers_));
+        foreach ($providers as $alias => $provider) {
+            $this->register($alias, $provider);
+        }
     }
 
     /**
@@ -177,6 +179,7 @@ class Provider implements ProviderInterface
         return $this->bindings->get($name);
     }
 
+
     /**
      * @param      $name
      * @param null $params
@@ -207,9 +210,12 @@ class Provider implements ProviderInterface
      * @param $name
      * @param $class
      */
-    public function register($name, $class)
+    public function register($name, $class, array $params = null)
     {
-        $this->providers->add($name, $class);
+        $instance = $this->injector->make($class, $params);
+        $this->providers->add($name, $instance);
+
+        $this->isProvider($instance) && $instance->register();
     }
 
     /**
@@ -246,4 +252,21 @@ class Provider implements ProviderInterface
     {
         return $this->providers->has($name);
     }
+
+    /**
+     * @param $instance
+     *
+     * @return bool
+     */
+    public function isProvider($instance)
+    {
+        $interfaces = class_implements($instance);
+
+        if (isset($interfaces[AbstractProviderInterface::class])) {
+            return true;
+        }
+
+        return false;
+    }
+
 }

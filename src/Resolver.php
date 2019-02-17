@@ -1,6 +1,5 @@
 <?php namespace Maduser\Minimal\Provider;
 
-use Maduser\Minimal\Provider\Contracts\AbstractProviderInterface;
 use Maduser\Minimal\Provider\Exceptions\IocNotResolvableException;
 use Maduser\Minimal\Provider\Provider;
 
@@ -38,34 +37,17 @@ class Resolver
         if ($registered = $this->provider->hasProvider($name)) {
 
             if (!is_object($registered) && !is_callable($registered)) {
-                $registered = $this->provider->getInjector()
-                                             ->make($registered, $params);
+                $registered = $this->provider->make($registered, $params);
             }
 
-            if ($this->isProvider($registered)) {
+            if ($this->provider->isProvider($registered)) {
                 return $registered->resolve($params);
             }
 
             return $registered;
         }
 
-        return $this->provider->getInjector()->make($name, $params);
-    }
-
-    /**
-     * @param $instance
-     *
-     * @return bool
-     */
-    public function isProvider($instance)
-    {
-        $interfaces = class_implements($instance);
-
-        if (isset($interfaces[AbstractProviderInterface::class])) {
-            return true;
-        }
-
-        return false;
+        return $this->provider->make($name, $params);
     }
 
     /**
