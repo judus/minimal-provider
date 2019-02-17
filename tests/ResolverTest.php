@@ -4,6 +4,7 @@ namespace Maduser\Minimal\Provider\Tests;
 
 use Maduser\Minimal\Framework\Providers\Contracts\ProviderInterface;
 use Maduser\Minimal\Provider\Contracts\AbstractProviderInterface;
+use Maduser\Minimal\Provider\Exceptions\ClassDoesNotExistException;
 use Maduser\Minimal\Provider\Provider;
 use Maduser\Minimal\Provider\Resolver;
 
@@ -11,16 +12,12 @@ use PHPUnit\Framework\TestCase;
 
 class ResolverTest extends TestCase
 {
-    public function testConstructor()
-    {
-        $resolver = new Resolver(new Provider());
-    }
-
     /**
-     * @expectedException \Maduser\Minimal\Provider\Exceptions\ClassDoesNotExistException
      */
     public function testResolveThrowsIocNotResolvable()
     {
+        $this->expectException(ClassDoesNotExistException::class);
+
         $resolver = new Resolver(new Provider());
 
         $resolver->resolve('dummy');
@@ -34,22 +31,6 @@ class ResolverTest extends TestCase
         $expected = new DummyClass();
 
         $this->assertEquals($expected, $result);
-    }
-
-    public function testIsProviderIsTrue()
-    {
-        $resolver = new Resolver(new Provider());
-        $instance = new DummyProvider();
-
-        $this->assertTrue($resolver->isProvider($instance));
-    }
-
-    public function testIsProviderIsFalse()
-    {
-        $resolver = new Resolver(new Provider());
-        $instance = new DummyClass();
-
-        $this->assertFalse($resolver->isProvider($instance));
     }
 
     public function testRegisteredIsNull()
@@ -116,5 +97,13 @@ class DummyProvider implements AbstractProviderInterface
     public function singleton($name, $object)
     {
         // TODO: Implement singleton() method.
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        // TODO: Implement __toString() method.
     }
 }

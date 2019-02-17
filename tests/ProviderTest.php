@@ -3,17 +3,108 @@
 namespace Maduser\Minimal\Provider\Tests;
 
 use Maduser\Minimal\Provider\Container;
+use Maduser\Minimal\Provider\Contracts\AbstractProviderInterface;
+use Maduser\Minimal\Provider\Contracts\ProviderInterface;
 use Maduser\Minimal\Provider\Injector;
 use Maduser\Minimal\Provider\Provider;
 use PHPUnit\Framework\TestCase;
 
-class ProviderTest extends TestCase
+class DummyA implements AbstractProviderInterface
 {
-    public function testConstructor()
+
+    /**
+     * @param $name
+     * @param $object
+     *
+     * @return mixed
+     */
+    public function singleton($name, $object)
     {
-        $provider = new Provider();
+        // TODO: Implement singleton() method.
     }
 
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return '';
+    }
+
+    /**
+     * @return mixed
+     */
+    public function init()
+    {
+        // TODO: Implement init() method.
+    }
+
+    /**
+     * @return mixed
+     */
+    public function register()
+    {
+        // TODO: Implement register() method.
+    }
+
+    /**
+     * @return mixed
+     */
+    public function resolve()
+    {
+        // TODO: Implement resolve() method.
+    }
+}
+
+class DummyB implements AbstractProviderInterface
+{
+
+    /**
+     * @param $name
+     * @param $object
+     *
+     * @return mixed
+     */
+    public function singleton($name, $object)
+    {
+        // TODO: Implement singleton() method.
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return '';
+    }
+
+    /**
+     * @return mixed
+     */
+    public function init()
+    {
+        // TODO: Implement init() method.
+    }
+
+    /**
+     * @return mixed
+     */
+    public function register()
+    {
+        // TODO: Implement register() method.
+    }
+
+    /**
+     * @return mixed
+     */
+    public function resolve()
+    {
+        // TODO: Implement resolve() method.
+    }
+}
+
+class ProviderTest extends TestCase
+{
     public function testConstructorWithParams()
     {
         $provider = new Provider([
@@ -122,17 +213,18 @@ class ProviderTest extends TestCase
     public function testAddProviders()
     {
         $expected = new Container([
-            'dummyA' => 'DummyA',
-            'dummyB' => 'DummyB'
+            'dummyA' => DummyA::class,
+            'dummyB' => new DummyB()
         ]);
 
         $provider = new Provider();
+
         $provider->setProviders([
-            'dummyA' => 'DummyA'
+            'dummyA' => DummyA::class
         ]);
 
         $provider->addProviders([
-            'dummyB' => 'DummyB'
+            'dummyB' => DummyB::class
         ]);
 
         $result = $provider->providers();
@@ -194,3 +286,4 @@ class DummyObjA
 {
 
 }
+

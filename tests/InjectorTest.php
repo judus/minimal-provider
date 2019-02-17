@@ -3,22 +3,18 @@
 namespace Maduser\Minimal\Provider\Tests;
 
 use Maduser\Minimal\Provider\Contracts\AbstractProviderInterface;
+use Maduser\Minimal\Provider\Exceptions\ClassDoesNotExistException;
 use Maduser\Minimal\Provider\Injector;
 use Maduser\Minimal\Provider\Provider;
 use PHPUnit\Framework\TestCase;
 
 class InjectorTest extends TestCase
 {
-    public function testConstructor()
-    {
-        $injector = new Injector(new Provider());
-    }
-
     /**
-     * @expectedException \Maduser\Minimal\Provider\Exceptions\ClassDoesNotExistException
      */
     public function testReflectThrowsClassDoesNotExist()
     {
+        $this->expectException(ClassDoesNotExistException::class);
         $injector = new Injector(new Provider());
         $injector->reflect('Dummy');
     }
@@ -171,6 +167,14 @@ class DummyProviderA implements AbstractProviderInterface
     }
 
     public function singleton($name, $object) {}
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        // TODO: Implement __toString() method.
+    }
 }
 
 interface DummyInterface {}
