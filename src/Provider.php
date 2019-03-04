@@ -32,6 +32,8 @@ class Provider implements ProviderInterface
      */
     private $injector;
 
+    private $compile;
+
     /**
      * @return Injector
      */
@@ -39,6 +41,19 @@ class Provider implements ProviderInterface
     {
         return $this->injector;
     }
+
+    /**
+     * @param bool $bool
+     *
+     * @return bool
+     */
+    public function compile(bool $bool = null)
+    {
+        is_null($bool) || $this->compile = $bool;
+
+        return $this->compile;
+    }
+
 
     /**
      * Provider constructor.
@@ -215,7 +230,7 @@ class Provider implements ProviderInterface
         $instance = $this->injector->make($class, $params);
         $this->providers->add($name, $instance);
 
-        $this->isProvider($instance) && $instance->register();
+        ! $this->compile && $this->isProvider($instance) && $instance->register();
     }
 
     /**
